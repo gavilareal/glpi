@@ -37,6 +37,8 @@ use donatj\UserAgent\UserAgentParser;
 use donatj\UserAgent\Platforms;
 use Glpi\Application\ErrorHandler;
 use Glpi\Application\View\TemplateRenderer;
+use Glpi\Asset\Asset;
+use Glpi\Asset\AssetDefinition;
 use Glpi\Console\Application;
 use Glpi\Plugin\Hooks;
 use Glpi\Toolbox\FrontEnd;
@@ -1317,7 +1319,8 @@ HTML;
                     'Computer', 'Monitor', 'Software',
                     'NetworkEquipment', 'Peripheral', 'Printer',
                     'CartridgeItem', 'ConsumableItem', 'Phone',
-                    'Rack', 'Enclosure', 'PDU', 'PassiveDCEquipment', 'Unmanaged', 'Cable'
+                    'Rack', 'Enclosure', 'PDU', 'PassiveDCEquipment', 'Unmanaged', 'Cable',
+                    Asset::class
                 ], $CFG_GLPI['devices_in_menu']),
                 'icon'    => 'ti ti-package'
             ],
@@ -1377,6 +1380,7 @@ HTML;
             'config' => [
                 'title' => __('Setup'),
                 'types' => [
+                    AssetDefinition::class,
                     'CommonDropdown', 'CommonDevice', 'Notification', 'Webhook',
                     'SLM', 'Config', 'FieldUnicity', 'CronTask', 'Auth',
                     'OAuthClient', 'MailCollector', 'Link', 'Plugin',
