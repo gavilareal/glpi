@@ -37,6 +37,7 @@ namespace Glpi\Asset;
 
 use CommonDBTM;
 use Glpi\Application\View\TemplateRenderer;
+use Glpi\Asset\Capacity\CapacityInterface;
 
 final class AssetDefinition extends CommonDBTM
 {
@@ -134,10 +135,10 @@ final class AssetDefinition extends CommonDBTM
     /**
      * Indicates whether the given capacity is enabled.
      *
-     * @param AssetCapacity $capacity
+     * @param CapacityInterface $capacity
      * @return bool
      */
-    public function hasCapacityEnabled(AssetCapacity $capacity): bool
+    public function hasCapacityEnabled(CapacityInterface $capacity): bool
     {
         // TODO Make asset capacities configurable
         // It requires to implement a cleaning of related items and of corresponding search options in saved searches
@@ -148,12 +149,12 @@ final class AssetDefinition extends CommonDBTM
     /**
      * Get the list of enabled capacities.
      *
-     * @return AssetCapacity[]
+     * @return CapacityInterface[]
      */
     public function getEnabledCapacities(): array
     {
         $capacities = [];
-        foreach (AssetCapacity::cases() as $capacity) {
+        foreach (AssetDefinitionManager::getInstance()->getAvailableCapacities() as $capacity) {
             if ($this->hasCapacityEnabled($capacity)) {
                 $capacities[] = $capacity;
             }

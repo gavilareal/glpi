@@ -33,45 +33,21 @@
  * ---------------------------------------------------------------------
  */
 
-namespace Glpi\Asset;
+namespace Glpi\Asset\Capacity;
 
-use Document_Item;
-use Infocom;
+use CommonGLPI;
+use Glpi\Asset\Asset;
 use Log;
 
-enum AssetCapacity
+class UseHistoryCapacity extends AbstractCapacity
 {
-    case Document;
-    case Infocom;
-    case Log;
-
-    /**
-     * Get the `$CFG_GLPI` keys in which the concrete class must be added when corresponding capacity is enabled.
-     *
-     * @return string[]
-     */
-    public function typeConfigKeys(): array
+    public function onClassBootstrap(string $classname): void
     {
-        return match ($this) {
-            AssetCapacity::Document => ['document_types'],
-            AssetCapacity::Infocom => ['infocom_types'],
-            default => [],
-        };
+        CommonGLPI::registerStandardTab($classname, Log::class, PHP_INT_MAX); // PHP_INT_MAX to ensure that tab is always the latest
     }
 
-    /**
-     * Get the itemtype to use in the tab that must be added when corresponding capacity is enabled.
-     * Will return null when there is no tab related to the capacity.
-     *
-     * @return array{itemtype: class-string, order: int}[]
-     */
-    public function tabs(): array
+    public function onObjectInstanciation(Asset $object): void
     {
-        return match ($this) {
-            AssetCapacity::Document => [['itemtype' => Document_Item::class, 'order' => 50]],
-            AssetCapacity::Infocom => [['itemtype' => Infocom::class, 'order' => 40]],
-            AssetCapacity::Log => [['itemtype' => Log::class, 'order' => 100]],
-            default => [],
-        };
+        $object->dohistory = true;
     }
 }

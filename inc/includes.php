@@ -54,9 +54,6 @@ include_once(GLPI_ROOT . "/inc/db.function.php");
 // Standard includes
 include_once(GLPI_ROOT . "/inc/config.php");
 
-// Bootstrap assets
-AssetDefinitionManager::getInstance()->bootstrapAssets();
-
 // Security of PHP_SELF
 $_SERVER['PHP_SELF'] = Html::cleanParametersURL($_SERVER['PHP_SELF']);
 
@@ -89,6 +86,9 @@ if (isset($AJAX_INCLUDE)) {
     $HEADER_LOADED = true;
 }
 
+// Assets classes autoload
+AssetDefinitionManager::getInstance()->registerAssetsAutoload();
+
 /* On startup, register all plugins configured for use. */
 if (!isset($PLUGINS_INCLUDED)) {
    // PLugin already included
@@ -97,6 +97,10 @@ if (!isset($PLUGINS_INCLUDED)) {
     $plugin = new Plugin();
     $plugin->init(true, $PLUGINS_EXCLUDED);
 }
+
+// Assets classes bootstraping.
+// Must be done after plugins initialization, to allow plugin to register new capacities.
+AssetDefinitionManager::getInstance()->boostrapAssets();
 
 if (!isset($_SESSION["MESSAGE_AFTER_REDIRECT"])) {
     $_SESSION["MESSAGE_AFTER_REDIRECT"] = [];

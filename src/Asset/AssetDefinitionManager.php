@@ -35,6 +35,10 @@
 
 namespace Glpi\Asset;
 
+use DirectoryIterator;
+use Glpi\Asset\Capacity\CapacityInterface;
+use ReflectionClass;
+
 final class AssetDefinitionManager
 {
     /**
@@ -51,6 +55,12 @@ final class AssetDefinitionManager
      * Mapping between assets concrete classes and definitions.
      */
     private array $definition_mapping = [];
+
+    /**
+     * List of GLPI core capacities.
+     * @var CapacityInterface[]
+     */
+    private array $core_capacities;
 
     /**
      * Singleton constructor
@@ -73,12 +83,24 @@ final class AssetDefinitionManager
         return self::$instance;
     }
 
-    public function bootstrapAssets(): void
+    /**
+     * Register assets concrete classes autoload.
+     *
+     * @return void
+     */
+    public function registerAssetsAutoload(): void
     {
-        /** @var array $CFG_GLPI */
-        global $CFG_GLPI;
-
         spl_autoload_register([$this, 'autoloadAssetClass']);
+    }
+
+    /**
+     * Bootstrap asset classes.
+     *
+     * @return void
+     */
+    public function boostrapAssets(): void
+    {
+        $capacities = $this->getAvailableCapacities();
 
         foreach ($this->getDefinitions() as $definition) {
             if (!$definition->isActive()) {
@@ -87,9 +109,9 @@ final class AssetDefinitionManager
 
             $concrete_class_name = $definition->getConcreteClassName();
 
-            foreach ($definition->getEnabledCapacities() as $capacity) {
-                foreach ($capacity->typeConfigKeys() as $type_config_key) {
-                    $CFG_GLPI[$type_config_key][] = $concrete_class_name;
+            foreach ($capacities as $capacity) {
+                if ($definition->hasCapacityEnabled($capacity)) {
+                    $capacity->onClassBootstrap($concrete_class_name);
                 }
             }
         }
@@ -147,6 +169,36 @@ final class AssetDefinitionManager
     public function getDefinitionForConcreteClass(string $classname): ?AssetDefinition
     {
         return $this->definition_mapping[$classname] ?? null;
+    }
+
+    /**
+     * Returns available capacities instance.
+     *
+     * @return CapacityInterface[]
+     */
+    public function getAvailableCapacities(): array
+    {
+        if (!isset($this->core_capacities)) {
+            // Automatically build capacities list.
+            // Would be better to do it with a DI auto-discovery feature, but it is not possible yet.
+            $directory_iterator = new DirectoryIterator(__DIR__ . '/Capacity');
+            /** @var \SplFileObject $file */
+            foreach ($directory_iterator as $file) {
+                $classname = $file->getExtension() === 'php'
+                    ? '\\Glpi\\Asset\\Capacity\\' . $file->getBasename('.php')
+                    : null;
+                if (
+                    $classname !== null
+                    && class_exists($classname)
+                    && is_subclass_of($classname, CapacityInterface::class)
+                    && (new ReflectionClass($classname))->isAbstract() === false
+                ) {
+                    $this->core_capacities[] = new $classname();
+                }
+            }
+        }
+
+        return $this->core_capacities;
     }
 
     /**
