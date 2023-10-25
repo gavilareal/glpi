@@ -50,6 +50,7 @@ if (!$DB->tableExists('glpi_assets_assetdefinitions')) {
             `icon` varchar(255) DEFAULT NULL,
             `comment` text,
             `is_active` tinyint NOT NULL DEFAULT '0',
+            `capacities` JSON,
             `date_creation` timestamp NULL DEFAULT NULL,
             `date_mod` timestamp NULL DEFAULT NULL,
             PRIMARY KEY (`id`),
@@ -59,7 +60,7 @@ if (!$DB->tableExists('glpi_assets_assetdefinitions')) {
             KEY `date_mod` (`date_mod`)
         ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;
 SQL;
-    $DB->queryOrDie($query);
+    $DB->doQueryOrDie($query);
 }
 
 if (!$DB->tableExists('glpi_assets_assets')) {
@@ -84,5 +85,5 @@ if (!$DB->tableExists('glpi_assets_assets')) {
             KEY `date_mod` (`date_mod`)
         ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;
 SQL;
-    $DB->queryOrDie($query);
+    $DB->doQueryOrDie($query);
 }

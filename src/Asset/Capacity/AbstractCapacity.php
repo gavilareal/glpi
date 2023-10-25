@@ -59,4 +59,8 @@ abstract class AbstractCapacity implements CapacityInterface
     public function onObjectInstanciation(Asset $object): void
     {
     }
+
+    public function onCapacityDisabled(string $classname): void
+    {
+    }
 }

@@ -40,16 +40,33 @@ use Glpi\Asset\Asset;
 interface CapacityInterface
 {
     /**
+     * Get the capacity label.
+     *
+     * @return string
+     */
+    public function getLabel(): string;
+
+    /**
      * Method executed during asset classes bootstraping.
      *
      * @param string $classname
+     * @return void
      */
     public function onClassBootstrap(string $classname): void;
+
+    /**
+     * Method executed when capacity is disabled on given asset class.
+     *
+     * @param string $classname
+     * @return void
+     */
+    public function onCapacityDisabled(string $classname): void;
 
     /**
      * Method executed during creation of an object instance (i.e. during `__construct()` method execution).
      *
      * @param Asset $object
+     * @return void
      */
     public function onObjectInstanciation(Asset $object): void;
 }

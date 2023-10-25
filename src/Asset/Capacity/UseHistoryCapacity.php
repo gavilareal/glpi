@@ -41,6 +41,11 @@ use Log;
 
 class UseHistoryCapacity extends AbstractCapacity
 {
+    public function getLabel(): string
+    {
+        return Log::getTypeName();
+    }
+
     public function onClassBootstrap(string $classname): void
     {
         CommonGLPI::registerStandardTab($classname, Log::class, PHP_INT_MAX); // PHP_INT_MAX to ensure that tab is always the latest
@@ -49,5 +54,14 @@ class UseHistoryCapacity extends AbstractCapacity
     public function onObjectInstanciation(Asset $object): void
     {
         $object->dohistory = true;
+    }
+
+    public function onCapacityDisabled(string $classname): void
+    {
+        /** @var \DBmysql $DB */
+        global $DB;
+
+        // Do not use `CommonDBTM::deleteByCriteria()` to prevent performances issues
+        $DB->delete(Log::getTable(), ['itemtype' => $classname]);
     }
 }

@@ -61,6 +61,13 @@ if (isset($_POST['add'])) {
     }
     Html::back();
 } else if (isset($_POST['update'])) {
+    if (
+        (bool)($_POST['_update_capacities'] ?? false)
+        && !array_key_exists('capacities', $_POST)
+    ) {
+        // If no capacity is checked, `$_POST['capacities']` will not be sent in request.
+        $_POST['capacities'] = [];
+    }
     $asset_definition->check($_POST['id'], UPDATE);
     if ($asset_definition->update($_POST)) {
         Event::log(

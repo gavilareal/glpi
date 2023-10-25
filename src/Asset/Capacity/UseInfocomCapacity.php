@@ -40,11 +40,30 @@ use Infocom;
 
 class UseInfocomCapacity extends AbstractCapacity
 {
+    public function getLabel(): string
+    {
+        return Infocom::getTypeName();
+    }
+
     public function onClassBootstrap(string $classname): void
     {
+        /** @var array $CFG_GLPI */
         global $CFG_GLPI;
+
         $CFG_GLPI['infocom_types'][] = $classname;
 
         CommonGLPI::registerStandardTab($classname, Infocom::class, 50);
+    }
+
+    public function onCapacityDisabled(string $classname): void
+    {
+        $infocom = new Infocom();
+        $infocom->deleteByCriteria(['itemtype' => $classname], force: true, history: false);
+
+        // TODO Clean history related to infocoms
+
+        // TODO Clean display preferences
+
+        // TODO Clean saved searches criteria ?
     }
 }

@@ -57,16 +57,33 @@ final class AssetDefinitionManager
     private array $definition_mapping = [];
 
     /**
-     * List of GLPI core capacities.
+     * List of available capacities.
      * @var CapacityInterface[]
      */
-    private array $core_capacities;
+    private array $capacities = [];
 
     /**
      * Singleton constructor
      */
     private function __construct()
     {
+        // Automatically build core capacities list.
+        // Would be better to do it with a DI auto-discovery feature, but it is not possible yet.
+        $directory_iterator = new DirectoryIterator(__DIR__ . '/Capacity');
+        /** @var \SplFileObject $file */
+        foreach ($directory_iterator as $file) {
+            $classname = $file->getExtension() === 'php'
+                ? 'Glpi\\Asset\\Capacity\\' . $file->getBasename('.php')
+                : null;
+            if (
+                $classname !== null
+                && class_exists($classname)
+                && is_subclass_of($classname, CapacityInterface::class)
+                && (new ReflectionClass($classname))->isAbstract() === false
+            ) {
+                $this->capacities[$classname] = new $classname();
+            }
+        }
     }
 
     /**
@@ -172,33 +189,24 @@ final class AssetDefinitionManager
     }
 
     /**
-     * Returns available capacities instance.
+     * Returns available capacities instances.
      *
      * @return CapacityInterface[]
      */
     public function getAvailableCapacities(): array
     {
-        if (!isset($this->core_capacities)) {
-            // Automatically build capacities list.
-            // Would be better to do it with a DI auto-discovery feature, but it is not possible yet.
-            $directory_iterator = new DirectoryIterator(__DIR__ . '/Capacity');
-            /** @var \SplFileObject $file */
-            foreach ($directory_iterator as $file) {
-                $classname = $file->getExtension() === 'php'
-                    ? '\\Glpi\\Asset\\Capacity\\' . $file->getBasename('.php')
-                    : null;
-                if (
-                    $classname !== null
-                    && class_exists($classname)
-                    && is_subclass_of($classname, CapacityInterface::class)
-                    && (new ReflectionClass($classname))->isAbstract() === false
-                ) {
-                    $this->core_capacities[] = new $classname();
-                }
-            }
-        }
+        return $this->capacities;
+    }
 
-        return $this->core_capacities;
+    /**
+     * Return capacity instance.
+     *
+     * @param string $classname
+     * @return CapacityInterface|null
+     */
+    public function getCapacity(string $classname): ?CapacityInterface
+    {
+        return $this->capacities[$classname] ?? null;
     }
 
     /**
