@@ -48,6 +48,11 @@ final class AssetDefinitionManager
     private array $definitions_data;
 
     /**
+     * Mapping between assets concrete classes and definitions.
+     */
+    private array $definition_mapping = [];
+
+    /**
      * Singleton constructor
      */
     private function __construct()
@@ -117,6 +122,17 @@ final class AssetDefinitionManager
     }
 
     /**
+     * Returns the definition that corresponds to an asset concrete class.
+     *
+     * @param string $classname
+     * @return AssetDefinition|null
+     */
+    public function getDefinitionForConcreteClass(string $classname): ?AssetDefinition
+    {
+        return $this->definition_mapping[$classname] ?? null;
+    }
+
+    /**
      * Get the asset definition corresponding to given id.
      *
      * @param int $definition_id
@@ -158,10 +174,9 @@ final class AssetDefinitionManager
     {
         eval(<<<PHP
 namespace Glpi\Asset;
-final class {$definition->getConcreteClassName(false)} extends Asset { }
+final class {$definition->getConcreteClassName(false)} extends Asset {}
 PHP
         );
-
-        $definition->getConcreteClassName()::setDefinition($definition);
+        $this->definition_mapping[$definition->getConcreteClassName()] = $definition;
     }
 }
