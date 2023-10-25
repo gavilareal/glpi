@@ -130,4 +130,34 @@ final class AssetDefinition extends CommonDBTM
             $this->getID()
         );
     }
+
+    /**
+     * Indicates whether the given capacity is enabled.
+     *
+     * @param AssetCapacity $capacity
+     * @return bool
+     */
+    public function hasCapacityEnabled(AssetCapacity $capacity): bool
+    {
+        // TODO Make asset capacities configurable
+        // It requires to implement a cleaning of related items and of corresponding search options in saved searches
+        // when related capacity is disabled.
+        return true;
+    }
+
+    /**
+     * Get the list of enabled capacities.
+     *
+     * @return AssetCapacity[]
+     */
+    public function getEnabledCapacities(): array
+    {
+        $capacities = [];
+        foreach (AssetCapacity::cases() as $capacity) {
+            if ($this->hasCapacityEnabled($capacity)) {
+                $capacities[] = $capacity;
+            }
+        }
+        return $capacities;
+    }
 }

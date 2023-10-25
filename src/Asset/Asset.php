@@ -275,6 +275,26 @@ abstract class Asset extends CommonDBTM
         return $definition->hasRightOnAssets($right);
     }
 
+    public function defineTabs($options = [])
+    {
+        $tabs = [];
+        $this->addDefaultFormTab($tabs);
+
+        // Add tabs related to enabled capacities
+        $capacities_with_tab = [];
+        foreach ($this->getDefinition()->getEnabledCapacities() as $capacity) {
+            if ($capacity->hasTab()) {
+                $capacities_with_tab[] = $capacity;
+            }
+        }
+        usort($capacities_with_tab, fn ($capacity_a, $capacity_b) => $capacity_a->tabOrder() - $capacity_b->tabOrder());
+        foreach ($capacities_with_tab as $capacity) {
+            $this->addStandardTab($capacity->tabItemtype(), $tabs, $options);
+        }
+
+        return $tabs;
+    }
+
     public function rawSearchOptions()
     {
         $search_options = parent::rawSearchOptions();

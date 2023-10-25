@@ -75,7 +75,25 @@ final class AssetDefinitionManager
 
     public function bootstrapAssets(): void
     {
+        /** @var array $CFG_GLPI */
+        global $CFG_GLPI;
+
         spl_autoload_register([$this, 'autoloadAssetClass']);
+
+        foreach ($this->getDefinitions() as $definition) {
+            if (!$definition->isActive()) {
+                continue;
+            }
+
+            $concrete_class_name = $definition->getConcreteClassName();
+
+            foreach ($definition->getEnabledCapacities() as $capacity) {
+                $type_config_key = $capacity->typeConfigKey();
+                if ($type_config_key !== null) {
+                    $CFG_GLPI[$type_config_key][] = $concrete_class_name;
+                }
+            }
+        }
     }
 
     /**
