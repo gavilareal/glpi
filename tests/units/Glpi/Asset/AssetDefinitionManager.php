@@ -41,18 +41,21 @@ class AssetDefinitionManager extends \GLPITestCase
 {
     public function testLoadConcreteClass(): void
     {
-        $definition = new AssetDefinition();
-        $definition->fields = [
-            'id'    => mt_rand(),
-            'name'  => __METHOD__,
-        ];
+        // use a loop to simulate multiple classes
+        for ($i = 0; $i < 5; $i++) {
+            $definition = new AssetDefinition();
+            $definition->fields = [
+                'id'    => mt_rand(),
+                'name'  => __METHOD__ . $i,
+            ];
 
-        $expected_classname = 'Glpi\\Asset\\Asset' . $definition->fields['id'];
+            $expected_classname = 'Glpi\\Asset\\Asset' . $definition->fields['id'];
 
-        $instance = \Glpi\Asset\AssetDefinitionManager::getInstance();
-        $this->callPrivateMethod($instance, 'loadConcreteClass', $definition);
+            $instance = \Glpi\Asset\AssetDefinitionManager::getInstance();
+            $this->callPrivateMethod($instance, 'loadConcreteClass', $definition);
 
-        $this->boolean(class_exists($expected_classname))->isTrue();
-        $this->object($expected_classname::getDefinition())->isEqualTo($definition);
+            $this->boolean(class_exists($expected_classname))->isTrue();
+            $this->object($expected_classname::getDefinition())->isEqualTo($definition);
+        }
     }
 }
