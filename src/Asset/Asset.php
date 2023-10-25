@@ -344,6 +344,14 @@ abstract class Asset extends CommonDBTM
         return $search_options;
     }
 
+    public function getDropdownSystemRestrictCriteria(): array
+    {
+        // In dropdowns, only items from current definition must be shown.
+        return [
+            AssetDefinition::getForeignKeyField() => $this->getDefinition()->getID(),
+        ];
+    }
+
     public static function getSystemCriteria(): array
     {
         // In search pages, only items from current definition must be shown.

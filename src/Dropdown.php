@@ -2676,7 +2676,6 @@ JAVASCRIPT;
         $displaywith = false;
         if (isset($post['displaywith'])) {
             if (is_array($post['displaywith']) && count($post['displaywith'])) {
-                $table = getTableForItemType($post['itemtype']);
                 foreach ($post['displaywith'] as $key => $value) {
                     if (!$DB->fieldExists($table, $value)) {
                         unset($post['displaywith'][$key]);
@@ -2706,7 +2705,7 @@ JAVASCRIPT;
             $post['emptylabel'] = Dropdown::EMPTY_VALUE;
         }
 
-        $where = [];
+        $where = $item->getDropdownSystemRestrictCriteria();
 
         if ($item->maybeDeleted()) {
             $where["$table.is_deleted"] = 0;

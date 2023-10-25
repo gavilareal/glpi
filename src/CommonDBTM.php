@@ -6712,4 +6712,15 @@ class CommonDBTM extends CommonGLPI
         }
         return $reference_event;
     }
+
+    /**
+     * Return restriction criteria to apply when fetching available dropdown values.
+     * These criteria will be added in the `WHERE` conditions.
+     *
+     * @return array
+     */
+    public function getDropdownSystemRestrictCriteria(): array
+    {
+        return [];
+    }
 }
