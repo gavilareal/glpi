@@ -45,8 +45,8 @@ use Toolbox;
 
 abstract class Asset extends CommonDBTM
 {
-
-    public function __construct() {
+    public function __construct()
+    {
         $definition = $this->getDefinition();
 
         // Handle capacities that must be activated through a class instance property
@@ -291,15 +291,13 @@ abstract class Asset extends CommonDBTM
         $this->addDefaultFormTab($tabs);
 
         // Add tabs related to enabled capacities
-        $capacities_with_tab = [];
+        $capacities_tabs = [];
         foreach ($this->getDefinition()->getEnabledCapacities() as $capacity) {
-            if ($capacity->hasTab()) {
-                $capacities_with_tab[] = $capacity;
-            }
+            array_push($capacities_tabs, ...$capacity->tabs());
         }
-        usort($capacities_with_tab, fn ($capacity_a, $capacity_b) => $capacity_a->tabOrder() - $capacity_b->tabOrder());
-        foreach ($capacities_with_tab as $capacity) {
-            $this->addStandardTab($capacity->tabItemtype(), $tabs, $options);
+        usort($capacities_tabs, fn ($tab_a, $tab_b) => $tab_a['order'] - $tab_b['order']);
+        foreach ($capacities_tabs as $tab) {
+            $this->addStandardTab($tab['itemtype'], $tabs, $options);
         }
 
         return $tabs;

@@ -46,59 +46,32 @@ enum AssetCapacity
     case Log;
 
     /**
-     * Get the `$CFG_GLPI` key in which the concrete class must be added when corresponding capacity is enabled.
-     * Will return null when there is no $CFG_GLPI` key related to the capacity.
+     * Get the `$CFG_GLPI` keys in which the concrete class must be added when corresponding capacity is enabled.
      *
-     * @return string|null
+     * @return string[]
      */
-    public function typeConfigKey(): ?string
+    public function typeConfigKeys(): array
     {
         return match ($this) {
-            AssetCapacity::Document => 'document_types',
-            AssetCapacity::Infocom => 'infocom_types',
-            default => null,
+            AssetCapacity::Document => ['document_types'],
+            AssetCapacity::Infocom => ['infocom_types'],
+            default => [],
         };
-    }
-
-    /**
-     * Indicates whether a tab must be added when corresponding capacity is enabled.
-     *
-     * @return bool
-     */
-    public function hasTab(): bool
-    {
-        return $this->tabItemtype() !== null;
     }
 
     /**
      * Get the itemtype to use in the tab that must be added when corresponding capacity is enabled.
      * Will return null when there is no tab related to the capacity.
      *
-     * @return string|null
+     * @return array{itemtype: class-string, order: int}[]
      */
-    public function tabItemtype(): ?string
+    public function tabs(): array
     {
         return match ($this) {
-            AssetCapacity::Document => Document_Item::class,
-            AssetCapacity::Infocom => Infocom::class,
-            AssetCapacity::Log => Log::class,
-            default => null,
-        };
-    }
-
-    /**
-     * Get "order" of the tab that must be added when corresponding capacity is enabled.
-     * A tab with a lower value will be placed before a tab with an higher value.
-     *
-     * @return int
-     */
-    public function tabOrder(): int
-    {
-        return match ($this) {
-            AssetCapacity::Infocom => 40,
-            AssetCapacity::Document => 50,
-            AssetCapacity::Log => 1000,
-            default => 100,
+            AssetCapacity::Document => [['itemtype' => Document_Item::class, 'order' => 50]],
+            AssetCapacity::Infocom => [['itemtype' => Infocom::class, 'order' => 40]],
+            AssetCapacity::Log => [['itemtype' => Log::class, 'order' => 100]],
+            default => [],
         };
     }
 }

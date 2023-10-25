@@ -88,8 +88,7 @@ final class AssetDefinitionManager
             $concrete_class_name = $definition->getConcreteClassName();
 
             foreach ($definition->getEnabledCapacities() as $capacity) {
-                $type_config_key = $capacity->typeConfigKey();
-                if ($type_config_key !== null) {
+                foreach ($capacity->typeConfigKeys() as $type_config_key) {
                     $CFG_GLPI[$type_config_key][] = $concrete_class_name;
                 }
             }
