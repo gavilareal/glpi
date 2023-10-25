@@ -45,6 +45,16 @@ use Toolbox;
 
 abstract class Asset extends CommonDBTM
 {
+
+    public function __construct() {
+        $definition = $this->getDefinition();
+
+        // Handle capacities that must be activated through a class instance property
+        if ($definition->hasCapacityEnabled(AssetCapacity::Log)) {
+            $this->dohistory = true;
+        }
+    }
+
     /**
      * Get the asset definition related to concrete class.
      *

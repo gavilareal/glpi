@@ -37,11 +37,13 @@ namespace Glpi\Asset;
 
 use Document_Item;
 use Infocom;
+use Log;
 
 enum AssetCapacity
 {
     case Document;
     case Infocom;
+    case Log;
 
     /**
      * Get the `$CFG_GLPI` key in which the concrete class must be added when corresponding capacity is enabled.
@@ -51,7 +53,7 @@ enum AssetCapacity
      */
     public function typeConfigKey(): ?string
     {
-        return match($this) {
+        return match ($this) {
             AssetCapacity::Document => 'document_types',
             AssetCapacity::Infocom => 'infocom_types',
             default => null,
@@ -76,9 +78,10 @@ enum AssetCapacity
      */
     public function tabItemtype(): ?string
     {
-        return match($this) {
+        return match ($this) {
             AssetCapacity::Document => Document_Item::class,
             AssetCapacity::Infocom => Infocom::class,
+            AssetCapacity::Log => Log::class,
             default => null,
         };
     }
@@ -91,9 +94,10 @@ enum AssetCapacity
      */
     public function tabOrder(): int
     {
-        return match($this) {
+        return match ($this) {
             AssetCapacity::Infocom => 40,
             AssetCapacity::Document => 50,
+            AssetCapacity::Log => 1000,
             default => 100,
         };
     }
