@@ -46,11 +46,37 @@ use Toolbox;
 abstract class Asset extends CommonDBTM
 {
     /**
+     * Definition related to concrete class.
+     * @var AssetDefinition
+     */
+    protected static AssetDefinition $definition;
+
+    /**
      * Get the asset definition related to concrete class.
      *
      * @return AssetDefinition
      */
-    abstract public static function getDefinition(): AssetDefinition;
+    public static function getDefinition(): AssetDefinition
+    {
+        if (!isset(static::$definition)) {
+            throw new \LogicException('Asset definition has not been defined.');
+        }
+        return static::$definition;
+    }
+
+    /**
+     * Defines the asset definition related to concrete class.
+     *
+     * @param AssetDefinition $definition
+     * @return void
+     */
+    public static function setDefinition(AssetDefinition $definition): void
+    {
+        if (isset(static::$definition)) {
+            throw new \LogicException('Asset definition cannot be redefined.');
+        }
+        static::$definition = $definition;
+    }
 
     public static function getTypeName($nb = 0)
     {

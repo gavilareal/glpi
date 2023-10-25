@@ -39,7 +39,7 @@ use Glpi\Asset\AssetDefinition;
 
 class AssetDefinitionManager extends \GLPITestCase
 {
-    public function testLoadConcreteClassWithEval(): void
+    public function testLoadConcreteClass(): void
     {
         $definition = new AssetDefinition();
         $definition->fields = [
@@ -53,7 +53,6 @@ class AssetDefinitionManager extends \GLPITestCase
         $this->callPrivateMethod($instance, 'loadConcreteClass', $definition);
 
         $this->boolean(class_exists($expected_classname))->isTrue();
-        $this->object($expected_classname::getDefinition())->isInstanceOf(AssetDefinition::class);
-        $this->array($expected_classname::getDefinition()->fields)->isEqualTo($definition->fields);
+        $this->object($expected_classname::getDefinition())->isEqualTo($definition);
     }
 }
