@@ -39,12 +39,22 @@ use CommonDBTM;
 use Glpi\Application\View\TemplateRenderer;
 use Glpi\Plugin\Hooks;
 use Entity;
+use Group;
+use Location;
+use Manufacturer;
 use Plugin;
 use Session;
+use State;
 use Toolbox;
+use User;
 
 abstract class Asset extends CommonDBTM
 {
+    /**
+     * Search option ID used for the asset definition system criteria.
+     */
+    private const DEFINITION_SO_ID = 250;
+
     final public function __construct()
     {
         foreach ($this->getDefinition()->getEnabledCapacities() as $capacity) {
@@ -286,18 +296,138 @@ abstract class Asset extends CommonDBTM
     {
         $search_options = parent::rawSearchOptions();
 
-        // TODO Search options
+        $search_options = array_merge($search_options, Location::rawSearchOptionsToAdd());
+
+        // TODO 4 for type
+
+        // TODO 40 for model
+
+        $search_options[] = [
+            'id'                 => '31',
+            'table'              => State::getTable(),
+            'field'              => 'completename',
+            'name'               => __('Status'),
+            'datatype'           => 'dropdown',
+            // TODO 'condition' to filter values
+        ];
+
+        $search_options[] = [
+            'id'                 => '5',
+            'table'              => $this->getTable(),
+            'field'              => 'serial',
+            'name'               => __('Serial number'),
+            'datatype'           => 'string',
+        ];
+
+        $search_options[] = [
+            'id'                 => '6',
+            'table'              => $this->getTable(),
+            'field'              => 'otherserial',
+            'name'               => __('Inventory number'),
+            'datatype'           => 'string',
+        ];
+
+        $search_options[] = [
+            'id'                 => '16',
+            'table'              => $this->getTable(),
+            'field'              => 'comment',
+            'name'               => __('Comments'),
+            'datatype'           => 'text'
+        ];
+
+        $search_options[] = [
+            'id'                 => '7',
+            'table'              => $this->getTable(),
+            'field'              => 'contact',
+            'name'               => __('Alternate username'),
+            'datatype'           => 'string',
+        ];
+
+        $search_options[] = [
+            'id'                 => '8',
+            'table'              => $this->getTable(),
+            'field'              => 'contact_num',
+            'name'               => __('Alternate username number'),
+            'datatype'           => 'string',
+        ];
+
+        $search_options[] = [
+            'id'                 => '70',
+            'table'              => User::getTable(),
+            'field'              => 'name',
+            'name'               => User::getTypeName(1),
+            'datatype'           => 'dropdown',
+            'right'              => 'all'
+        ];
+
+        $search_options[] = [
+            'id'                 => '71',
+            'table'              => Group::getTable(),
+            'field'              => 'completename',
+            'name'               => Group::getTypeName(1),
+            'condition'          => ['is_itemgroup' => 1],
+            'datatype'           => 'dropdown'
+        ];
+
+        $search_options[] = [
+            'id'                 => '19',
+            'table'              => $this->getTable(),
+            'field'              => 'date_mod',
+            'name'               => __('Last update'),
+            'datatype'           => 'datetime',
+            'massiveaction'      => false
+        ];
+
+        $search_options[] = [
+            'id'                 => '121',
+            'table'              => $this->getTable(),
+            'field'              => 'date_creation',
+            'name'               => __('Creation date'),
+            'datatype'           => 'datetime',
+            'massiveaction'      => false
+        ];
+
+
+        $search_options[] = [
+            'id'                 => '23',
+            'table'              => Manufacturer::getTable(),
+            'field'              => 'name',
+            'name'               => Manufacturer::getTypeName(1),
+            'datatype'           => 'dropdown'
+        ];
+
+        $search_options[] = [
+            'id'                 => '24',
+            'table'              => User::getTable(),
+            'field'              => 'name',
+            'linkfield'          => 'users_id_tech',
+            'name'               => __('Technician in charge of the hardware'),
+            'datatype'           => 'dropdown',
+            'right'              => 'own_ticket'
+        ];
+
+        $search_options[] = [
+            'id'                 => '49',
+            'table'              => Group::getTable(),
+            'field'              => 'completename',
+            'linkfield'          => 'groups_id_tech',
+            'name'               => __('Group in charge of the hardware'),
+            'condition'          => ['is_assign' => 1],
+            'datatype'           => 'dropdown'
+        ];
+
+        // TODO 65 for template
 
         $search_options[] = [
             'id'                 => '80',
-            'table'              => 'glpi_entities',
+            'table'              => Entity::getTable(),
             'field'              => 'completename',
             'name'               => Entity::getTypeName(1),
             'datatype'           => 'dropdown'
         ];
 
         $search_options[] = [
-            'id'                 => '3',
+            'id'                 => self::DEFINITION_SO_ID,
             'table'              => $this->getTable(),
             'field'              => AssetDefinition::getForeignKeyField(),
             'name'               => AssetDefinition::getTypeName(),
@@ -305,6 +435,8 @@ abstract class Asset extends CommonDBTM
             'nosearch'           => true,
             'nodisplay'          => true,
         ];
+
+        // TODO Search options for capacities
 
         foreach ($search_options as &$search_option) {
             if (
@@ -334,7 +466,7 @@ abstract class Asset extends CommonDBTM
         // In search pages, only items from current definition must be shown.
         return [
             [
-                'field'      => 3,
+                'field'      => self::DEFINITION_SO_ID,
                 'searchtype' => 'equals',
                 'value'      => static::getDefinition()->getID()
             ]

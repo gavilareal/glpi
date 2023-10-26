@@ -129,13 +129,20 @@ final class AssetDefinitionManager
 
             $concrete_class_name = $definition->getConcreteClassName();
 
-            // register asset
-            // TODO
-            // requires the following fields to be added to DB:
-            // states_id, serial, otherserial, contact, contact_num, users_id, groups_id, users_id_tech, groups_id_tech
-            // $CFG_GLPI['asset_types'][] = $concrete_class_name;
+            // Register asset into configuration entries related to the capacities that cannot be disabled
+            $config_keys = [
+                'asset_types',
+                'linkuser_types',
+                'linkgroup_types',
+                'linkuser_tech_types',
+                'linkgroup_tech_types',
+                'location_types',
+            ];
+            foreach ($config_keys as $config_key) {
+                $CFG_GLPI[$config_key][] = $concrete_class_name;
+            }
 
-            // bootstrap capacities
+            // Bootstrap capacities
             foreach ($capacities as $capacity) {
                 if ($definition->hasCapacityEnabled($capacity)) {
                     $capacity->onClassBootstrap($concrete_class_name);

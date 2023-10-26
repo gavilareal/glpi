@@ -1001,6 +1001,28 @@ final class SQLProvider implements SearchProviderInterface
         return $criteria;
     }
 
+    /**
+     * Return where part related to system criteria of main itemtype.
+     *
+     * @param string $itemtype  Main itemtype
+     * @param  array $data      Common array used by search engine
+     *
+     * @return string
+     */
+    private static function getSystemWhereCriteriaSQL(string $itemtype): string
+    {
+        if (!method_exists($itemtype, 'getSystemCriteria')) {
+            return '';
+        }
+
+        $sql = self::constructCriteriaSQL(
+            $itemtype::getSystemCriteria(),
+            ['itemtype' => $itemtype],
+            SearchOption::getOptionsForItemtype($itemtype)
+        );
+        return $sql;
+    }
+
     public static function getWhereCriteria($nott, $itemtype, $ID, $searchtype, $val, $meta = 0): ?array
     {
         /** @var \DBmysql $DB */
@@ -3743,7 +3765,13 @@ final class SQLProvider implements SearchProviderInterface
                                 $ctable,
                                 $tmpquery
                             );
-                            $query_num  = str_replace($data['itemtype'], $ctype, $query_num);
+                            $query_num  = str_replace($data['itemtype'], $DB->escape($ctype), $query_num);
+
+                            $system_criteria_sql = self::getSystemWhereCriteriaSQL($ctype);
+                            if ($system_criteria_sql !== '') {
+                                $query_num .= ' AND ' . $system_criteria_sql;
+                            }
+
                             $query_num .= " AND `$ctable`.`id` IS NOT NULL ";
 
                             // Add deleted if item have it
@@ -3768,7 +3796,7 @@ final class SQLProvider implements SearchProviderInterface
                             $replace  = "FROM `$reftable`
                                   INNER JOIN `$ctable`
                                        ON (`$reftable`.`items_id` =`$ctable`.`id`
-                                           AND `$reftable`.`itemtype` = '$ctype')";
+                                           AND `$reftable`.`itemtype` = '{$DB->escape($ctype)}')";
 
                             $query_num = str_replace(
                                 "FROM `" .
@@ -3797,6 +3825,10 @@ final class SQLProvider implements SearchProviderInterface
                     }
                 }
             } else {
+                $system_criteria_sql = self::getSystemWhereCriteriaSQL($data['itemtype']);
+                if ($system_criteria_sql !== '') {
+                    $query_num .= ' AND ' . $system_criteria_sql;
+                }
                 $data['sql']['count'][] = $query_num;
             }
         }
@@ -3840,6 +3872,11 @@ final class SQLProvider implements SearchProviderInterface
                         $tmpquery = $SELECT . ", '{$DB->escape($ctype)}' AS TYPE " .
                             $FROM .
                             $WHERE;
+
+                        $system_criteria_sql = self::getSystemWhereCriteriaSQL($ctype);
+                        if ($system_criteria_sql !== '') {
+                            $tmpquery .= ' AND ' . $system_criteria_sql;
+                        }
 
                         $tmpquery .= " AND `$ctable`.`id` IS NOT NULL ";
 
@@ -3932,6 +3969,11 @@ final class SQLProvider implements SearchProviderInterface
             $QUERY .= str_replace($CFG_GLPI["union_search_type"][$data['itemtype']] . ".", "", $ORDER) .
                 $LIMIT;
         } else {
+            $system_criteria_sql = self::getSystemWhereCriteriaSQL($data['itemtype']);
+            if ($system_criteria_sql !== '') {
+                $WHERE .= ' AND ' . $system_criteria_sql;
+            }
+
             $data['sql']['raw'] = [
                 'SELECT' => $SELECT,
                 'FROM' => $FROM,
