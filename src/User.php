@@ -5113,6 +5113,7 @@ JAVASCRIPT;
             $field_user  = 'users_id';
             $field_group = 'groups_id';
         }
+        $itemtypes = array_unique($itemtypes);
 
         $group_where = "";
         $groups      = [];
@@ -5148,14 +5149,16 @@ JAVASCRIPT;
                 continue;
             }
             if ($item->canView()) {
-                $itemtable = getTableForItemType($itemtype);
                 $iterator_params = [
-                    'FROM'   => $itemtable,
-                    'WHERE'  => [
-                        'OR' => [
-                            $field_user => $ID
-                        ] + $group_where
-                    ],
+                    'FROM'   => $item->getTable(),
+                    'WHERE'  => array_merge(
+                        $item->getSystemSQLCriteria(),
+                        [
+                            'OR' => [
+                                $field_user => $ID
+                            ] + $group_where
+                        ]
+                    ),
                 ];
 
                 if ($item->maybeTemplate()) {
