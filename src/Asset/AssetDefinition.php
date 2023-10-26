@@ -164,7 +164,7 @@ final class AssetDefinition extends CommonDBTM
                 Session::addMessageAfterRedirect(
                     sprintf(
                         __('The following field has an incorrect value: "%s".'),
-                        'capacities'
+                        __('Capacities')
                     ),
                     false,
                     ERROR
@@ -264,7 +264,7 @@ final class AssetDefinition extends CommonDBTM
             $search_options[] = [
                 'id'            => $i,
                 'table'         => self::getTable(),
-                'field'         => 'capacities',
+                'field'         => sprintf('_capacities_%s', $capacity::class),
                 'name'          => $capacity->getLabel(),
                 'computation'   => QueryFunction::if(
                     condition: ['capacities' => ['LIKE', '%' . $search_string . '%']],
