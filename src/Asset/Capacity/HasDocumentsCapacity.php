@@ -38,10 +38,9 @@ namespace Glpi\Asset\Capacity;
 use CommonGLPI;
 use Document;
 use Document_Item;
-use Log;
 use Session;
 
-class UseDocumentsCapacity extends AbstractCapacity
+class HasDocumentsCapacity extends AbstractCapacity
 {
     public function getLabel(): string
     {
@@ -60,26 +59,15 @@ class UseDocumentsCapacity extends AbstractCapacity
 
     public function onCapacityDisabled(string $classname): void
     {
-        /** @var \DBmysql $DB */
-        global $DB;
-
+        // Delete relations to documents
         $document_item = new Document_Item();
         $document_item->deleteByCriteria(['itemtype' => $classname], force: true, history: false);
 
         // Clean history related to documents
-        // Do not use `CommonDBTM::deleteByCriteria()` to prevent performances issues
-        $DB->delete(
-            Log::getTable(),
-            [
-                'OR' => [
-                    ['itemtype' => $classname,      'itemtype_link' => Document::class],
-                    ['itemtype' => Document::class, 'itemtype_link' => $classname],
-                ],
-            ]
-        );
+        $this->deleteRelationLogs($classname, Document::class);
 
-        // TODO Clean display preferences
-
-        // TODO Clean saved searches criteria ?
+        // Clean display preferences
+        $documents_search_options = Document::rawSearchOptionsToAdd($classname);
+        $this->deleteDisplayPreferences($classname, $documents_search_options);
     }
 }

@@ -35,11 +35,13 @@
 
 namespace Glpi\Asset\Capacity;
 
+use DisplayPreference;
 use Glpi\Asset\Asset;
+use Log;
 
 /**
- * Abstract capacity that provides an empty implementation of some `\Glpi\Asset\Capacity\CapacityInterface` methods
- * that can legitimately be effectless.
+ * Abstract capacity that provides, among others, an empty implementation of some `\Glpi\Asset\Capacity\CapacityInterface`
+ * methods that can legitimately be effectless.
  */
 abstract class AbstractCapacity implements CapacityInterface
 {
@@ -62,5 +64,106 @@ abstract class AbstractCapacity implements CapacityInterface
 
     public function onCapacityDisabled(string $classname): void
     {
+    }
+
+    /**
+     * Delete logs related to relations between two itemtypes.
+     *
+     * @param string $source_itemtype
+     * @param string $linked_itemtype
+     * @return void
+     */
+    protected function deleteRelationLogs(string $source_itemtype, string $linked_itemtype): void
+    {
+        /** @var \DBmysql $DB */
+        global $DB;
+
+        // Do not use `CommonDBTM::deleteByCriteria()` to prevent performances issues
+        $DB->delete(
+            Log::getTable(),
+            [
+                'OR' => [
+                    ['itemtype' => $source_itemtype, 'itemtype_link' => $linked_itemtype],
+                    ['itemtype' => $linked_itemtype, 'itemtype_link' => $source_itemtype],
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Delete logs related to given fields (identified by their search options ID).
+     *
+     * @param string $source_itemtype
+     * @param array $search_options
+     * @return void
+     */
+    protected function deleteFieldsLogs(string $itemtype, array $search_options): void
+    {
+        /** @var \DBmysql $DB */
+        global $DB;
+
+        $ids = $this->extractOptionsIds($search_options);
+        if (count($ids) === 0) {
+            return;
+        }
+
+        // Do not use `CommonDBTM::deleteByCriteria()` to prevent performances issues
+        $DB->delete(
+            Log::getTable(),
+            [
+                'itemtype'          => $itemtype,
+                'id_search_option'  => $ids,
+            ]
+        );
+    }
+
+    /**
+     * Delete display preferences for given search options.
+     *
+     * @param string $source_itemtype
+     * @param array $search_options
+     * @return void
+     */
+    protected function deleteDisplayPreferences(string $itemtype, array $search_options): void
+    {
+        $ids = $this->extractOptionsIds($search_options);
+        if (count($ids) === 0) {
+            return;
+        }
+
+        $display_preference = new DisplayPreference();
+        $display_preference->deleteByCriteria(
+            [
+                'itemtype' => $itemtype,
+                'num'      => $ids,
+            ],
+            force: true,
+            history: false
+        );
+    }
+
+    /**
+     * Extract search options IDs from a list of search options.
+     *
+     * @param array $search_options
+     * @return array
+     */
+    private function extractOptionsIds(array $search_options): array
+    {
+        $ids = [];
+
+        foreach ($search_options as $search_option) {
+            if (
+                !is_array($search_option)
+                || !array_key_exists('id', $search_option)
+                || (!is_int($search_option['id']) && !ctype_digit($search_option['id']))
+            ) {
+                continue;
+            }
+
+            $ids[] = $search_option['id'];
+        }
+
+        return $ids;
     }
 }

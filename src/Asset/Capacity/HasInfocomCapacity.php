@@ -38,7 +38,7 @@ namespace Glpi\Asset\Capacity;
 use CommonGLPI;
 use Infocom;
 
-class UseInfocomCapacity extends AbstractCapacity
+class HasInfocomCapacity extends AbstractCapacity
 {
     public function getLabel(): string
     {
@@ -57,13 +57,16 @@ class UseInfocomCapacity extends AbstractCapacity
 
     public function onCapacityDisabled(string $classname): void
     {
+        // Delete related infocom data
         $infocom = new Infocom();
         $infocom->deleteByCriteria(['itemtype' => $classname], force: true, history: false);
 
-        // TODO Clean history related to infocoms
+        $infocom_search_options = Infocom::rawSearchOptionsToAdd($classname);
 
-        // TODO Clean display preferences
+        // Clean history related to infocoms
+        $this->deleteFieldsLogs($classname, $infocom_search_options);
 
-        // TODO Clean saved searches criteria ?
+        // Clean display preferences
+        $this->deleteDisplayPreferences($classname, $infocom_search_options);
     }
 }

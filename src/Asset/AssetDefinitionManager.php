@@ -117,6 +117,9 @@ final class AssetDefinitionManager
      */
     public function boostrapAssets(): void
     {
+        /** @var array $CFG_GLPI */
+        global $CFG_GLPI;
+
         $capacities = $this->getAvailableCapacities();
 
         foreach ($this->getDefinitions() as $definition) {
@@ -126,6 +129,13 @@ final class AssetDefinitionManager
 
             $concrete_class_name = $definition->getConcreteClassName();
 
+            // register asset
+            // TODO
+            // requires the following fields to be added to DB:
+            // states_id, serial, otherserial, contact, contact_num, users_id, groups_id, users_id_tech, groups_id_tech
+            // $CFG_GLPI['asset_types'][] = $concrete_class_name;
+
+            // bootstrap capacities
             foreach ($capacities as $capacity) {
                 if ($definition->hasCapacityEnabled($capacity)) {
                     $capacity->onClassBootstrap($concrete_class_name);

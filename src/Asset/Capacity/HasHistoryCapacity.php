@@ -39,7 +39,7 @@ use CommonGLPI;
 use Glpi\Asset\Asset;
 use Log;
 
-class UseHistoryCapacity extends AbstractCapacity
+class HasHistoryCapacity extends AbstractCapacity
 {
     public function getLabel(): string
     {
