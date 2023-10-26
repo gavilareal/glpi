@@ -3837,7 +3837,7 @@ final class SQLProvider implements SearchProviderInterface
                     $tmpquery = "";
                     // AllAssets case
                     if ($data['itemtype'] == \AllAssets::getType()) {
-                        $tmpquery = $SELECT . ", '$ctype' AS TYPE " .
+                        $tmpquery = $SELECT . ", '{$DB->escape($ctype)}' AS TYPE " .
                             $FROM .
                             $WHERE;
 
@@ -3866,13 +3866,13 @@ final class SQLProvider implements SearchProviderInterface
                         // Use quoted value to prevent replacement of AllAssets in column identifiers
                         $tmpquery = str_replace(
                             $DB->quoteValue(\AllAssets::getType()),
-                            $DB->quoteValue($ctype),
+                            $DB->quoteValue($DB->escape($ctype)),
                             $tmpquery
                         );
                     } else {// Ref table case
                         $reftable = $data['itemtype']::getTable();
 
-                        $tmpquery = $SELECT . ", '$ctype' AS TYPE,
+                        $tmpquery = $SELECT . ", '{$DB->escape($ctype)}' AS TYPE,
                                       `$reftable`.`id` AS refID, " . "
                                       `$ctable`.`entities_id` AS ENTITY " .
                             $FROM .
@@ -3889,7 +3889,7 @@ final class SQLProvider implements SearchProviderInterface
                         $replace = "FROM `$reftable`" . "
                               INNER JOIN `$ctable`" . "
                                  ON (`$reftable`.`items_id`=`$ctable`.`id`" . "
-                                     AND `$reftable`.`itemtype` = '$ctype')";
+                                     AND `$reftable`.`itemtype` = '{$DB->escape($ctype)}')";
                         $tmpquery = str_replace(
                             "FROM `" .
                             $CFG_GLPI["union_search_type"][$data['itemtype']] . "`",
