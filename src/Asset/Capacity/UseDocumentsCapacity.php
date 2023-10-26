@@ -39,12 +39,13 @@ use CommonGLPI;
 use Document;
 use Document_Item;
 use Log;
+use Session;
 
 class UseDocumentsCapacity extends AbstractCapacity
 {
     public function getLabel(): string
     {
-        return Document::getTypeName();
+        return Document::getTypeName(Session::getPluralNumber());
     }
 
     public function onClassBootstrap(string $classname): void
