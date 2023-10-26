@@ -2705,7 +2705,7 @@ JAVASCRIPT;
             $post['emptylabel'] = Dropdown::EMPTY_VALUE;
         }
 
-        $where = $item->getDropdownSystemRestrictCriteria();
+        $where = $item->getSystemSQLCriteria();
 
         if ($item->maybeDeleted()) {
             $where["$table.is_deleted"] = 0;

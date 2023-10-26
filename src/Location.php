@@ -492,16 +492,19 @@ class Location extends CommonTreeDropdown
             if (!$item->maybeLocated()) {
                 continue;
             }
-            $table = getTableForItemType($itemtype);
+            $table = $item->getTable();
             $itemtype_criteria = [
                 'SELECT' => [
                     "$table.id",
                     new QueryExpression($DB->quoteValue($itemtype) . ' AS ' . $DB->quoteName('type')),
                 ],
                 'FROM'   => $table,
-                'WHERE'  => [
-                    "$table.locations_id"   => $locations_id,
-                ]
+                'WHERE'  => array_merge(
+                    $item->getSystemSQLCriteria(),
+                    [
+                        "$table.locations_id"   => $locations_id,
+                    ]
+                )
             ];
             if ($item->maybeDeleted()) {
                 $itemtype_criteria['WHERE']['is_deleted'] = 0;

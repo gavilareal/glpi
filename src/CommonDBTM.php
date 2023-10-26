@@ -6714,12 +6714,24 @@ class CommonDBTM extends CommonGLPI
     }
 
     /**
-     * Return restriction criteria to apply when fetching available dropdown values.
+     * Return system SQL criteria to apply when fetching table values of current itemtype.
+     * These criteria will be applied when fetching a list of items identified by their itemtype/table,
+     * for instance, when fetching available dropdown values, or a list of linked items.
      * These criteria will be added in the `WHERE` conditions.
      *
      * @return array
      */
-    public function getDropdownSystemRestrictCriteria(): array
+    public static function getSystemSQLCriteria(): array
+    {
+        return [];
+    }
+
+    /**
+     * Return system search criteria to apply when executing a search on current itemtype.
+     *
+     * @return array
+     */
+    public static function getSystemSearchCriteria(): array
     {
         return [];
     }

@@ -1011,12 +1011,8 @@ final class SQLProvider implements SearchProviderInterface
      */
     private static function getSystemWhereCriteriaSQL(string $itemtype): string
     {
-        if (!method_exists($itemtype, 'getSystemCriteria')) {
-            return '';
-        }
-
         $sql = self::constructCriteriaSQL(
-            $itemtype::getSystemCriteria(),
+            $itemtype::getSystemSearchCriteria(),
             ['itemtype' => $itemtype],
             SearchOption::getOptionsForItemtype($itemtype)
         );
