@@ -408,8 +408,7 @@ final class SearchEngine
                             && !in_array($criterion['field'], $data['toview'])
                         ) {
                             if (
-                                !($criterion['_hidden'] ?? false)
-                                && $criterion['field'] != 'all'
+                                $criterion['field'] != 'all'
                                 && $criterion['field'] != 'view'
                                 && (!isset($criterion['meta'])
                                     || !$criterion['meta'])

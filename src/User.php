@@ -5149,8 +5149,9 @@ JAVASCRIPT;
                 continue;
             }
             if ($item->canView()) {
+                $itemtable = getTableForItemType($itemtype);
                 $iterator_params = [
-                    'FROM'   => $item->getTable(),
+                    'FROM'   => $itemtable,
                     'WHERE'  => array_merge(
                         $item->getSystemSQLCriteria(),
                         [

@@ -492,7 +492,7 @@ class Location extends CommonTreeDropdown
             if (!$item->maybeLocated()) {
                 continue;
             }
-            $table = $item->getTable();
+            $table = getTableForItemType($itemtype);
             $itemtype_criteria = [
                 'SELECT' => [
                     "$table.id",

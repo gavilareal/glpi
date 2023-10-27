@@ -207,7 +207,7 @@ class Report extends CommonGLPI
         echo "<table class='tab_cadrehov'>";
 
         foreach ($items as $itemtype) {
-            $table_item = $itemtype::getTable();
+            $table_item = getTableForItemType($itemtype);
             $criteria = [
                 'COUNT'  => 'cpt',
                 'FROM'   => $table_item,
@@ -285,13 +285,13 @@ class Report extends CommonGLPI
             echo "<tr class='tab_bg_1'><td colspan='2' class='b'>" . $itemtype::getTypeName(Session::getPluralNumber()) .
               "</td></tr>";
 
-            $table_item = $itemtype::getTable();
             $typeclass  = $itemtype . "Type";
 
             if (!class_exists($typeclass)) {
                 continue;
             }
 
+            $table_item = getTableForItemType($itemtype);
             $type_table = getTableForItemType($typeclass);
             $typefield  = getForeignKeyFieldForTable(getTableForItemType($typeclass));
 

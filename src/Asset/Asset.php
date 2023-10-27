@@ -89,7 +89,7 @@ abstract class Asset extends CommonDBTM
     public static function getTable($classname = null)
     {
         if (is_a($classname ?? static::class, self::class, true)) {
-            return getTableForItemType(self::class);
+            return parent::getTable(self::class);
         }
         return parent::getTable($classname);
     }
